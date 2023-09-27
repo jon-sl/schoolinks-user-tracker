@@ -1,0 +1,13 @@
+.note {
+    width: fit-content;
+    padding: 0.5rem;
+    display: flex;
+    column-gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.removeNote {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #0069c2;
+}
