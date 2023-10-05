@@ -2,8 +2,15 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 function App() {
-    const env = window.location.hostname.split('.')[0].split('-')[1] || 'prod';
+    const getEnv = () => {
+      const hostname = window.location.hostname.split('.')[0];
+      if (hostname.includes('dev')) {
+        return hostname.substring(4);
+      }
+      return hostname.split('-')[1] || 'prod';
+    };
 
+    const env = getEnv();
 
     const getSyncData = () => {
       return new Promise((resolve, reject) => {

@@ -3,8 +3,65 @@
 
 import _ from "lodash";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Input } from "@/components/ui/input";
 
+import { CaretSortIcon, Cross2Icon } from "@radix-ui/react-icons";
+
+import { Button } from "@/components/ui/button";
 import "./Row.css";
+
+const DeleteNotePopover = ({
+  note,
+  user,
+  removeNote,
+}: {
+  note: string;
+  user: any;
+  removeNote: (id: any, note: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger>
+        <Badge variant="outline">{note}</Badge>
+      </PopoverTrigger>
+      <PopoverContent>
+        <p className="text-lg font-semibold mb-2">
+          Delete note?
+        </p>
+        <div className="flex justify-between w-full">
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => removeNote(user["field-id"], note)}
+          >
+            Delete
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 function Row({ env, user, setCurrent, getSyncData }: any) {
   const id = user["field-id"];
@@ -70,54 +127,98 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
   };
 
   return (
-    <tr key={user["field-id"]}>
-      <td>
-        {user["field-name"]} {user["field-first_name"]}{" "}
-        {user["field-last_name"]}
-      </td>
-      <td>
-        <a
-          href={
-            districtUrl
-              ? getDistrictUrl(false)
-              : `https://api-${env}.schoolinks.com/api/v1/sl_users/instant-login/${user["field-id"]}/?is_localhost=&redirect_url=%2F`
-          }
-          target="_blank"
-        >
-          Instant
-        </a>{" "}
-        |{" "}
-        <a
-          href={
-            districtUrl
-              ? getDistrictUrl(true)
-              : `https://api-${env}.schoolinks.com/api/v1/sl_users/instant-login/${user["field-id"]}/?is_localhost=1&redirect_url=%2F`
-          }
-          target="_blank"
-        >
-          Localhost
-        </a>
-      </td>
-      <td>
-        {(user.notes || []).map((note: any) => (
-          <div className="note">
-            <small>{note}</small>
-            <small className="removeNote" onClick={() => removeNote(user["field-id"], note)}>x</small>
+    <Collapsible className="rounded-md border p-1 pr-4 shadow-sm">
+      <div className="flex items-center">
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <CaretSortIcon className="h-4 w-4" />
+            <span className="sr-only">Toggle</span>
+          </Button>
+        </CollapsibleTrigger>
+        <div className="flex items-center justify-between space-x-4 w-full">
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <h4 className="text-sm font-semibold">
+                {user["field-name"]} {user["field-first_name"]}{" "}
+                {user["field-last_name"]}
+              </h4>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem onClick={() => remove(user["field-id"])}>
+                Delete user
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
+          <div>
+            <a
+              href={
+                districtUrl
+                  ? getDistrictUrl(false)
+                  : `https://api-${env}.schoolinks.com/api/v1/sl_users/instant-login/${user["field-id"]}/?is_localhost=&redirect_url=%2F`
+              }
+              target="_blank"
+              className="text-sm text-muted-foreground"
+            >
+              Instant
+            </a>{" "}
+            /{" "}
+            <a
+              href={
+                districtUrl
+                  ? getDistrictUrl(true)
+                  : `https://api-${env}.schoolinks.com/api/v1/sl_users/instant-login/${user["field-id"]}/?is_localhost=1&redirect_url=%2F`
+              }
+              target="_blank"
+              className="text-sm text-muted-foreground"
+            >
+              Local
+            </a>
           </div>
-        ))}
-        <input
+        </div>
+      </div>
+      <CollapsibleContent className="pl-4">
+        <div className="flex gap-x-1 items-center">
+          <h4 className="text-sm font-medium leading-none">Id: </h4>
+          <p className="text-sm text-muted-foreground">
+            {user["field-id"] || "n/a"}
+          </p>
+        </div>
+        <div className="flex gap-x-1 items-center">
+          <h4 className="text-sm font-medium leading-none">Email: </h4>
+          <p className="text-sm text-muted-foreground">
+            {user["field-email"] || "n/a"}
+          </p>
+        </div>
+        <div className="flex gap-x-1 items-center">
+          <h4 className="text-sm font-medium leading-none">User type: </h4>
+          <p className="text-sm text-muted-foreground">
+            {user["field-user_type"] || "n/a"}
+          </p>
+        </div>
+        <div className="flex gap-x-1 items-center">
+          <h4 className="text-sm font-medium leading-none">Grade: </h4>
+          <p className="text-sm text-muted-foreground">
+            {user["field-grade"] || "n/a"}
+          </p>
+        </div>
+        <div className="flex gap-1 my-2 flex-wrap">
+          {(user.notes || []).map((note: any) => (
+            <DeleteNotePopover
+              note={note}
+              user={user}
+              removeNote={removeNote}
+            />
+          ))}
+        </div>
+        <Input
           placeholder="Add note"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           onKeyDown={handleKeyDown}
+          className="mb-2"
         />
-      </td>
-      <td>
-        <a href="#" onClick={() => remove(user["field-id"])}>
-          X
-        </a>
-      </td>
-    </tr>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

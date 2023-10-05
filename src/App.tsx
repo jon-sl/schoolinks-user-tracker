@@ -2,8 +2,16 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import "./App.css";
-import Row from './Row';
-
+import Row from "./Row";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import _ from "lodash";
 import { useEffect, useState, useMemo } from "react";
 
@@ -52,61 +60,80 @@ function App() {
   const filteredData = useMemo(
     () =>
       _.filter(Object.values(current), (item: any) => {
-        const email = item["field-email"]?.toLowerCase()?.includes(searchTerm.toLowerCase());
-        const firstName = item["field-first_name"]?.toLowerCase()?.includes(searchTerm.toLowerCase());
-        const lastName = item["field-last_name"]?.toLowerCase()?.includes(searchTerm.toLowerCase());
-        const id = item["field-id"]?.toLowerCase()?.includes(searchTerm.toLowerCase());
-        const userType = item["field-user_type"]?.toLowerCase()?.includes(searchTerm.toLowerCase());
-        const note = (item.notes || []).filter((note: any) => note.toLowerCase().includes(searchTerm.toLowerCase()));
-        return email || firstName || lastName || id || userType || note.length > 0;
+        const email = item["field-email"]
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        const fullName = item["field-first_name"]
+          ?.concat(" ")
+          .concat(item["field-last_name"])
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        const id = item["field-id"]
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        const userType = item["field-user_type"]
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        const grade = item["field-grade"]
+          ?.toString()
+          ?.includes(searchTerm.toLowerCase());
+        const note = (item.notes || []).filter((note: any) =>
+          note.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        return email || fullName || id || userType || grade || note.length > 0;
       }),
     [current, searchTerm]
   );
 
   return (
     <div className="container">
-      <select
+      <Select
         value={env}
-        onChange={(e) => {
-          setEnv(e.target.value);
-          chrome.storage.sync.set({ selectedEnv: e.target.value });
+        onValueChange={(e) => {
+          setEnv(e);
+          chrome.storage.sync.set({ selectedEnv: e });
         }}
       >
-        <option value="dev-blue">dev-blue</option>
-        <option value="dev-green">dev-green</option>
-        <option value="dev-purple">dev-purple</option>
-        <option value="dev-red">dev-red</option>
-        <option value="qa">qa</option>
-        <option value="staging">staging</option>
-        <option value="stable">stable</option>
-        <option value="prod">prod</option>
-      </select>
-      <input
-        type="text"
-        placeholder="Search"
+        <SelectTrigger>
+          <SelectValue placeholder="Environment" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="dev-blue">dev-blue</SelectItem>
+          <SelectItem value="dev-green">dev-green</SelectItem>
+          <SelectItem value="dev-purple">dev-purple</SelectItem>
+          <SelectItem value="dev-red">dev-red</SelectItem>
+          <SelectItem value="qa">qa</SelectItem>
+          <SelectItem value="staging">staging</SelectItem>
+          <SelectItem value="stable">stable</SelectItem>
+          <SelectItem value="prod">prod</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search"
       />
+      <Separator className="my-2" />
       {!current || Object.entries(current).length === 0 ? (
         <>No favorites yet</>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Login</th>
-              <th>Notes</th>
-              <th>Remove</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.length > 0 ? filteredData.map((user: any) => {
+        <>
+          {filteredData.length > 0 ? (
+            filteredData.map((user: any) => {
               return (
-                <Row key={user["field-id"]} user={user} env={env} setCurrent={setCurrent} getSyncData={getSyncData} />
+                <Row
+                  key={user["field-id"]}
+                  user={user}
+                  env={env}
+                  setCurrent={setCurrent}
+                  getSyncData={getSyncData}
+                />
               );
-            }) : <>No results found</>}
-          </tbody>
-        </table>
+            })
+          ) : (
+            <>No results found</>
+          )}
+        </>
       )}
     </div>
   );
