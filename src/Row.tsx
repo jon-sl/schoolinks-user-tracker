@@ -14,18 +14,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 
-import { CaretSortIcon, Cross2Icon } from "@radix-ui/react-icons";
+import { CaretSortIcon, TrashIcon } from "@radix-ui/react-icons";
 
 import { Button } from "@/components/ui/button";
-import "./Row.css";
 
 const DeleteNotePopover = ({
   note,
@@ -40,12 +33,10 @@ const DeleteNotePopover = ({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger>
-        <Badge variant="outline">{note}</Badge>
+        <Badge>{note}</Badge>
       </PopoverTrigger>
       <PopoverContent>
-        <p className="text-lg font-semibold mb-2">
-          Delete note?
-        </p>
+        <p className="text-lg font-semibold mb-2">Remove note?</p>
         <div className="flex justify-between w-full">
           <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
             Cancel
@@ -53,9 +44,44 @@ const DeleteNotePopover = ({
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => removeNote(user["field-id"], note)}
+            onClick={() => {
+              removeNote(user["field-id"], note);
+              setIsOpen(false);
+            }}
           >
-            Delete
+            Remove
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+const RemoveUserPopover = ({ removeUser }: { removeUser: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger>
+        <Button variant="destructive" size="sm">
+          <TrashIcon className="h-4 w-4" />
+          <span className="sr-only">Toggle</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <p className="text-lg font-semibold mb-2">Remove user?</p>
+        <div className="flex justify-between w-full">
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              removeUser();
+              setIsOpen(false);
+            }}
+          >
+            Remove
           </Button>
         </div>
       </PopoverContent>
@@ -136,43 +162,46 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
           </Button>
         </CollapsibleTrigger>
         <div className="flex items-center justify-between space-x-4 w-full">
-          <ContextMenu>
-            <ContextMenuTrigger>
-              <h4 className="text-sm font-semibold">
-                {user["field-name"]} {user["field-first_name"]}{" "}
-                {user["field-last_name"]}
-              </h4>
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem onClick={() => remove(user["field-id"])}>
-                Delete user
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
+          <h4 className="text-sm font-semibold">
+            {user["field-name"]} {user["field-first_name"]}{" "}
+            {user["field-last_name"]}
+          </h4>
           <div>
             <a
               href={
                 districtUrl
                   ? getDistrictUrl(false)
-                  : `https://api-${env}.schoolinks.com/api/v1/sl_users/instant-login/${user["field-id"]}/?is_localhost=&redirect_url=%2F`
+                  : `https://api${
+                      env === "prod" ? "" : "-" + env
+                    }.schoolinks.com/api/v1/sl_users/instant-login/${
+                      user["field-id"]
+                    }/?is_localhost=&redirect_url=%2F`
               }
               target="_blank"
               className="text-sm text-muted-foreground"
             >
               Instant
             </a>{" "}
-            /{" "}
-            <a
-              href={
-                districtUrl
-                  ? getDistrictUrl(true)
-                  : `https://api-${env}.schoolinks.com/api/v1/sl_users/instant-login/${user["field-id"]}/?is_localhost=1&redirect_url=%2F`
-              }
-              target="_blank"
-              className="text-sm text-muted-foreground"
-            >
-              Local
-            </a>
+            {env !== "prod" && (
+              <>
+                /{" "}
+                <a
+                  href={
+                    districtUrl
+                      ? getDistrictUrl(true)
+                      : `https://api${
+                          env === "prod" ? "" : "-" + env
+                        }.schoolinks.com/api/v1/sl_users/instant-login/${
+                          user["field-id"]
+                        }/?is_localhost=1&redirect_url=%2F`
+                  }
+                  target="_blank"
+                  className="text-sm text-muted-foreground"
+                >
+                  Local
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -201,22 +230,26 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
             {user["field-grade"] || "n/a"}
           </p>
         </div>
-        <div className="flex gap-1 my-2 flex-wrap">
-          {(user.notes || []).map((note: any) => (
-            <DeleteNotePopover
-              note={note}
-              user={user}
-              removeNote={removeNote}
-            />
-          ))}
+        {(user.notes || []).length > 0 && (
+          <div className="flex gap-1 mt-2 flex-wrap">
+            {(user.notes || []).map((note: any) => (
+              <DeleteNotePopover
+                note={note}
+                user={user}
+                removeNote={removeNote}
+              />
+            ))}
+          </div>
+        )}
+        <div className="flex gap-x-2 mt-2 items-center mb-2">
+          <Input
+            placeholder="Add note"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <RemoveUserPopover removeUser={() => remove(user["field-id"])} />
         </div>
-        <Input
-          placeholder="Add note"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="mb-2"
-        />
       </CollapsibleContent>
     </Collapsible>
   );
