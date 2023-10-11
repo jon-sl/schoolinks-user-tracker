@@ -9,87 +9,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-
 import { CaretSortIcon, TrashIcon } from "@radix-ui/react-icons";
-
+import { setSyncData } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import ConfirmationPopover from "@/src/ConfirmationPopover";
 
-const DeleteNotePopover = ({
-  note,
-  user,
-  removeNote,
-}: {
-  note: string;
-  user: any;
-  removeNote: (id: any, note: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger>
-        <Badge>{note}</Badge>
-      </PopoverTrigger>
-      <PopoverContent>
-        <p className="text-lg font-semibold mb-2">Remove note?</p>
-        <div className="flex justify-between w-full">
-          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              removeNote(user["field-id"], note);
-              setIsOpen(false);
-            }}
-          >
-            Remove
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-const RemoveUserPopover = ({ removeUser }: { removeUser: () => void }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger>
-        <Button variant="destructive" size="sm">
-          <TrashIcon className="h-4 w-4" />
-          <span className="sr-only">Toggle</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent>
-        <p className="text-lg font-semibold mb-2">Remove user?</p>
-        <div className="flex justify-between w-full">
-          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              removeUser();
-              setIsOpen(false);
-            }}
-          >
-            Remove
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-function Row({ env, user, setCurrent, getSyncData }: any) {
+function Row({ env, user, setCurrent, getSyncData, isDevMode }: any) {
   const id = user["field-id"];
   const [notes, setNotes] = useState("");
 
@@ -100,17 +26,12 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
         ...previousData[env][id],
         notes: [...(previousData[env][id].notes || []), ...notes.split(",")],
       };
-      chrome.storage.sync.set(
-        { [env]: { ...previousData[env], [id]: updatedData } },
-        function () {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-          } else {
-            setCurrent({ ...previousData[env], [id]: updatedData });
-            setNotes("");
-          }
-        }
-      );
+      await setSyncData({
+        items: { [env]: { ...previousData[env], [id]: updatedData } },
+      }).then(() => {
+        setCurrent({ ...previousData[env], [id]: updatedData });
+        setNotes("");
+      });
     }
   };
 
@@ -120,27 +41,20 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
       ...previousData[env][id],
       notes: previousData[env][id].notes.filter((n: any) => n !== note),
     };
-    chrome.storage.sync.set(
-      { [env]: { ...previousData[env], [id]: updatedNotes } },
-      function () {
-        if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError);
-        } else {
-          setCurrent({ ...previousData[env], [id]: updatedNotes });
-        }
-      }
-    );
+    await setSyncData({
+      items: { [env]: { ...previousData[env], [id]: updatedNotes } },
+    }).then(() => {
+      setCurrent({ ...previousData[env], [id]: updatedNotes });
+    });
   };
 
   const remove = async (id: any) => {
     const previousData: any = await getSyncData();
     delete previousData[env][id];
-    chrome.storage.sync.set({ [env]: previousData[env] }, function () {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-      } else {
-        setCurrent(previousData[env]);
-      }
+    await setSyncData({
+      items: { [env]: previousData[env] },
+    }).then(() => {
+      setCurrent(previousData[env]);
     });
   };
 
@@ -163,38 +77,23 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
         </CollapsibleTrigger>
         <div className="flex items-center justify-between space-x-4 w-full">
           <h4 className="text-sm font-semibold">
-            {user["field-name"]} {user["field-first_name"]}{" "}
-            {user["field-last_name"]}
+            {user["field-name"] || user["field-district_name"]}{" "}
+            {user["field-first_name"] || user["field-user_first_name"]}{" "}
+            {user["field-last_name"] || user["field-user_last_name"]}
           </h4>
           <div>
             <a
-              href={
-                districtUrl
-                  ? getDistrictUrl(false)
-                  : `https://api${
-                      env === "prod" ? "" : "-" + env
-                    }.schoolinks.com/api/v1/sl_users/instant-login/${
-                      user["field-id"]
-                    }/?is_localhost=&redirect_url=%2F`
-              }
+              href={districtUrl ? getDistrictUrl(false) : user["instant"]}
               target="_blank"
               className="text-sm text-muted-foreground"
             >
               Instant
             </a>{" "}
-            {env !== "prod" && (
+            {env !== "prod" && isDevMode && (
               <>
                 /{" "}
                 <a
-                  href={
-                    districtUrl
-                      ? getDistrictUrl(true)
-                      : `https://api${
-                          env === "prod" ? "" : "-" + env
-                        }.schoolinks.com/api/v1/sl_users/instant-login/${
-                          user["field-id"]
-                        }/?is_localhost=1&redirect_url=%2F`
-                  }
+                  href={districtUrl ? getDistrictUrl(true) : user["local"]}
                   target="_blank"
                   className="text-sm text-muted-foreground"
                 >
@@ -215,7 +114,7 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
         <div className="flex gap-x-1 items-center">
           <h4 className="text-sm font-medium leading-none">Email: </h4>
           <p className="text-sm text-muted-foreground">
-            {user["field-email"] || "n/a"}
+            {user["field-email"] || user["field-user_email"] || "n/a"}
           </p>
         </div>
         <div className="flex gap-x-1 items-center">
@@ -233,10 +132,10 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
         {(user.notes || []).length > 0 && (
           <div className="flex gap-1 mt-2 flex-wrap">
             {(user.notes || []).map((note: any) => (
-              <DeleteNotePopover
-                note={note}
-                user={user}
-                removeNote={removeNote}
+              <ConfirmationPopover
+                prompt="Remove note?"
+                renderElement={() => <Badge>{note}</Badge>}
+                remove={() => removeNote(id, note)}
               />
             ))}
           </div>
@@ -248,7 +147,16 @@ function Row({ env, user, setCurrent, getSyncData }: any) {
             onChange={(e) => setNotes(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <RemoveUserPopover removeUser={() => remove(user["field-id"])} />
+          <ConfirmationPopover
+            prompt="Remove user?"
+            renderElement={() => (
+              <Button variant="destructive" size="sm">
+                <TrashIcon className="h-4 w-4" />
+                <span className="sr-only">Toggle</span>
+              </Button>
+            )}
+            remove={() => remove(id)}
+          />
         </div>
       </CollapsibleContent>
     </Collapsible>

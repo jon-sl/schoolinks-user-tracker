@@ -1,67 +1,69 @@
 /// <reference types="chrome" />
 /// <reference types="vite-plugin-svgr/client" />
 
+import { getSyncData, setSyncData } from "@/lib/utils";
+
 function App() {
-    const getEnv = () => {
-      const hostname = window.location.hostname.split('.')[0];
-      if (hostname.includes('dev')) {
-        return hostname.substring(4);
-      }
-      return hostname.split('-')[1] || 'prod';
-    };
+  const getEnv = () => {
+    const hostname = window.location.hostname.split(".")[0];
+    if (hostname.includes("dev")) {
+      return hostname.substring(4);
+    }
+    return hostname.split("-")[1] || "prod";
+  };
 
-    const env = getEnv();
+  const env = getEnv();
 
-    const getSyncData = () => {
-      return new Promise((resolve, reject) => {
-        chrome.storage.sync.get([env], function(result) {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-            reject(chrome.runtime.lastError);
-          } else {
-            resolve(result);
-          }
-        });
+  const loginLinkFields = document.getElementsByClassName("field-login_link");
+  const k12LoginLinkFields = document.getElementsByClassName(
+    "field-login_as_k12_admin"
+  );
+  const linkFields =
+    loginLinkFields.length === 0 ? k12LoginLinkFields : loginLinkFields;
+  for (let i = 0; i < linkFields.length; i++) {
+    linkFields[i].innerHTML = `${linkFields[i].innerHTML}<br><br>`;
+    const fave = document.createElement("a");
+    fave.href = "#";
+    fave.textContent = "Favorite";
+    fave.onclick = async () => {
+      const tableRow = linkFields[i].parentNode;
+      const rowData: any = {};
+      let fieldId: any;
+      tableRow?.querySelectorAll("td[class], th[class]").forEach((td) => {
+        const className = td.className;
+        const textContent = td.textContent?.trim();
+        rowData[className] = textContent;
+        if (className === "field-login_as_k12_admin") {
+          const firstAnchor = td.querySelector("a");
+          const hrefValue = firstAnchor?.getAttribute("href");
+          const url = new URL(hrefValue || "");
+          rowData[className] = `${url.origin}${url.pathname}`;
+          fieldId = rowData["field-id"];
+        }
+        if (className === "field-login_link") {
+          const firstAnchor = td
+            .querySelectorAll("a")?.[0]
+            ?.getAttribute("href");
+          const secondAnchor = td
+            .querySelectorAll("a")?.[1]
+            ?.getAttribute("href");
+          rowData.instant = firstAnchor;
+          rowData.local = secondAnchor;
+          fieldId = rowData["field-id"] || firstAnchor?.split("/")?.[7];
+          rowData["field-id"] = fieldId;
+        }
       });
-    }
-    
-    
-    const loginLinkFields = document.getElementsByClassName('field-login_link');
-    const k12LoginLinkFields = document.getElementsByClassName('field-login_as_k12_admin');
-    const linkFields = loginLinkFields.length === 0 ? k12LoginLinkFields : loginLinkFields;
-    for (let i = 0; i < linkFields.length; i++) {
-      linkFields[i].innerHTML = `${linkFields[i].innerHTML}<br><br>`;
-      const fave = document.createElement('a');
-      fave.href = '#';
-      fave.textContent = 'Favorite';
-      fave.onclick = async () => {
-        const tableRow = linkFields[i].parentNode;
-        const rowData: any = {};
-        tableRow?.querySelectorAll('td[class], th[class]').forEach((td) => {
-          const className = td.className;
-          const textContent = td.textContent?.trim();
-          rowData[className] = textContent;
-          if (className === 'field-login_as_k12_admin') {
-            const firstAnchor = td.querySelector('a');
-            const hrefValue = firstAnchor?.getAttribute('href');
-            const url = new URL(hrefValue || '');
-            rowData[className] = `${url.origin}${url.pathname}`;
-          }
-        });
-        const fieldId = rowData["field-id"];
-        const previousData: any = await getSyncData();
-        await chrome.storage.sync.set({ [env]: { ...previousData[env], [fieldId]: rowData } }, function() {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-          } else {
-            console.log('Favorited', rowData);
-          }
-        });
-      };
-      linkFields[i].appendChild(fave);
-    }
+      const previousData: any = await getSyncData({ keys: env });
+      await setSyncData({
+        items: { [env]: { ...previousData[env], [fieldId]: rowData } },
+      }).then(() => {
+        console.log(rowData);
+      });
+    };
+    linkFields[i].appendChild(fave);
+  }
 
-    return <></>;
+  return <></>;
 }
 
 export default App;

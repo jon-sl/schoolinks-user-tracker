@@ -1,18 +1,16 @@
 {
   "manifest_version": 3,
   "name": "SchooLinks User Tracker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "action": {
-    "default_title": "Popup",
+    "default_title": "SchooLinks User Tracker",
     "default_popup": "index.html",
     "default_icon": {
       "16": "favicon16.png",
       "32": "favicon32.png"
     }
   },
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["storage"],
   "icons": {
     "16": "favicon16.png",
     "32": "favicon32.png",
@@ -22,19 +20,11 @@
   "description": "SchooLinks User Tracker enhances Django Admin, efficiently managing favorite districts and users for quick access.",
   "content_scripts": [
     {
-      "matches": [
-        "https://api-dev-blue.schoolinks.com/sl-admin/*",
-        "https://api-dev-green.schoolinks.com/sl-admin/*",
-        "https://api-dev-purple.schoolinks.com/sl-admin/*",
-        "https://api-dev-red.schoolinks.com/sl-admin/*",
-        "https://api-qa.schoolinks.com/sl-admin/*",
-        "https://api-staging.schoolinks.com/sl-admin/*",
-        "https://api-stable.schoolinks.com/sl-admin/*",
-        "https://api.schoolinks.com/sl-admin/*"
+      "matches": ["https://*.schoolinks.com/sl-admin/*"],
+      "exclude_matches": [
+        "https://*.schoolinks.com/sl-admin/sl_users/user/*/change/"
       ],
-      "js": [
-        "content-script/src/main.tsx"
-      ],
+      "js": ["content-script/src/main.tsx"],
       "media": []
     }
   ]
