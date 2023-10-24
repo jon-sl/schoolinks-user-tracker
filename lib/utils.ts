@@ -13,7 +13,7 @@ export const getSyncData = ({
   isExport?: boolean;
 } = {}) => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get(isExport ? null : keys, function (result) {
+    chrome.storage.local.get(isExport ? null : keys, function (result) {
       if (chrome.runtime.lastError) {
         console.error(chrome.runtime.lastError);
         reject(chrome.runtime.lastError);
@@ -27,7 +27,7 @@ export const getSyncData = ({
 
 export const setSyncData = ({ items = {} }: { items: object }) => {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.set(items, function () {
+    chrome.storage.local.set(items, function () {
       if (chrome.runtime.lastError) {
         console.error(chrome.runtime.lastError);
         reject(chrome.runtime.lastError);
