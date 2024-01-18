@@ -45,8 +45,27 @@ function App() {
   const [current, setCurrent] = useState({});
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [requiresVPN, setRequiresVPN] = useState(false);
 
   useEffect(() => {
+    const fetchVPNStatus = async () => {
+      try {
+        const response = await fetch(
+          "https://api.schoolinks.com/sl-admin/login/?next=/sl-admin/"
+        );
+        const res = await response;
+        console.log(res.status);
+        if (res.status === 403) {
+          setRequiresVPN(true);
+          return;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      setRequiresVPN(false);
+    };
+    fetchVPNStatus();
+
     // Get last environment selected
     const getCurrentEnv = async () => {
       const result: any = await getSyncData({ keys: "selectedEnv" });
@@ -59,6 +78,13 @@ function App() {
     getCurrentEnv();
     getDevModeState();
   }, []);
+
+  useEffect(() => {
+    // Backdoor to deactivate vpn check
+    if (searchTerm === "opensesame123") {
+      setRequiresVPN(false);
+    }
+  }, [searchTerm]);
 
   useEffect(() => {
     // Update data when user changes environment
@@ -292,55 +318,71 @@ function App() {
         </Dialog>
       </div>
       <Separator className="my-2" />
-      {!current || Object.entries(current).length === 0 ? (
+      {requiresVPN ? (
         <div className="flex flex-col gap-y-2">
           <h2 className="scroll-m-20 pb-1 text-3xl font-semibold tracking-tight transition-colors first:mt-0 text-center">
-            🤠
+            🚫
           </h2>
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight text-center">
-            No favorites yet
+            Unable to access
           </h4>
           <p className="leading-7 text-center mt-0">
-            Go to{" "}
-            <a
-              href={`https://api${
-                env === "prod" ? "" : "-" + env
-              }.schoolinks.com/sl-admin/`}
-              target="_blank"
-              className="underline text-muted-foreground"
-            >
-              Django Admin
-            </a>{" "}
-            and start favoriting some users!
+            Please ensure that you are connected to the required VPN
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-y-1 overflow-auto">
-          {filteredData.length > 0 ? (
-            filteredData.map((user: any) => {
-              console.log(user);
-              return (
-                <Row
-                  key={user["field-id"]}
-                  user={user}
-                  env={env}
-                  setCurrent={setCurrent}
-                  getSyncData={getSyncData}
-                  isDevMode={isDevMode}
-                />
-              );
-            })
-          ) : (
-            <div className="flex flex-col gap-y-2 h-full justify-center">
+        <>
+          {!current || Object.entries(current).length === 0 ? (
+            <div className="flex flex-col gap-y-2">
               <h2 className="scroll-m-20 pb-1 text-3xl font-semibold tracking-tight transition-colors first:mt-0 text-center">
-                😔
+                🤠
               </h2>
               <h4 className="scroll-m-20 text-xl font-semibold tracking-tight text-center">
-                No results found
+                No favorites yet
               </h4>
+              <p className="leading-7 text-center mt-0">
+                Go to{" "}
+                <a
+                  href={`https://api${
+                    env === "prod" ? "" : "-" + env
+                  }.schoolinks.com/sl-admin/`}
+                  target="_blank"
+                  className="underline text-muted-foreground"
+                >
+                  Django Admin
+                </a>{" "}
+                and start favoriting some users!
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-y-1 overflow-auto">
+              {filteredData.length > 0 ? (
+                filteredData.map((user: any) => {
+                  console.log(user);
+                  return (
+                    <Row
+                      key={user["field-id"]}
+                      user={user}
+                      env={env}
+                      setCurrent={setCurrent}
+                      getSyncData={getSyncData}
+                      isDevMode={isDevMode}
+                    />
+                  );
+                })
+              ) : (
+                <div className="flex flex-col gap-y-2 h-full justify-center">
+                  <h2 className="scroll-m-20 pb-1 text-3xl font-semibold tracking-tight transition-colors first:mt-0 text-center">
+                    😔
+                  </h2>
+                  <h4 className="scroll-m-20 text-xl font-semibold tracking-tight text-center">
+                    No results found
+                  </h4>
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
