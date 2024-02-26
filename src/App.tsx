@@ -145,14 +145,22 @@ function App() {
 
   const getEnvColor = (e?: string) => {
     switch (e || env) {
+      case "dataops":
+        return "text-dataops";
       case "dev-blue":
         return "text-dev-blue";
+      case "qa-dev":
+        return "text-qa-blue"
       case "dev-green":
         return "text-dev-green";
       case "dev-purple":
         return "text-dev-purple";
+      case "dev-lavender":
+        return "text-dev-lavender";
       case "dev-red":
         return "text-dev-red";
+      case "dev-crimson":
+          return "text-dev-crimson";
       case "qa":
         return "text-qa";
       case "staging":

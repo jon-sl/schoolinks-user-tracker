@@ -5,11 +5,10 @@ import { getSyncData, setSyncData } from "@/lib/utils";
 
 function App() {
   const getEnv = () => {
-    const hostname = window.location.hostname.split(".")[0];
-    if (hostname.includes("dev")) {
-      return hostname.substring(4);
-    }
-    return hostname.split("-")[1] || "prod";
+    if (window.location.hostname.split(".")[1].includes("schoolinks")) {
+      return "prod";
+    } else 
+    return window.location.hostname.split(".")[1];;
   };
 
   const env = getEnv();

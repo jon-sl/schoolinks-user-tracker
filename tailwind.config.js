@@ -10,11 +10,15 @@ module.exports = {
   theme: {
     colors: {
       "dev-blue": "#2563eb",
+      "qa-blue": "#2563eb",
       "dev-green": "#16a34a",
       "dev-purple": "#673ab7",
+      "dev-lavender": "#673ab7",
       "dev-red": "#dc2626",
+      "dev-crimson": "#dc2626",
       qa: "#3f51b5",
       staging: "#a56800",
+      dataops: "#a56800",
       stable: "#598FA5",
       prod: "#9b1f1f",
     },
