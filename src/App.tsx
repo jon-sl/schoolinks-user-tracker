@@ -145,14 +145,22 @@ function App() {
 
   const getEnvColor = (e?: string) => {
     switch (e || env) {
+      case "dataops":
+        return "text-dataops";
       case "dev-blue":
         return "text-dev-blue";
+      case "qa-dev":
+        return "text-qa-blue";
       case "dev-green":
         return "text-dev-green";
       case "dev-purple":
         return "text-dev-purple";
+      case "dev-lavender":
+        return "text-dev-lavender";
       case "dev-red":
         return "text-dev-red";
+      case "dev-crimson":
+        return "text-dev-crimson";
       case "qa":
         return "text-qa";
       case "staging":
@@ -188,7 +196,7 @@ function App() {
               <CommandInput placeholder="Search environments" />
               <CommandEmpty>No environment found</CommandEmpty>
               <CommandGroup>
-                {environments.slice(isDevMode ? 0 : 4).map((e) => (
+                {environments.slice(isDevMode ? 0 : 7).map((e) => (
                   <CommandItem
                     key={e.value}
                     className={`font-bold ${getEnvColor(e.value)}`}
@@ -344,7 +352,7 @@ function App() {
                 Go to{" "}
                 <a
                   href={`https://api${
-                    env === "prod" ? "" : "-" + env
+                    env === "prod" ? "" : "." + env
                   }.schoolinks.com/sl-admin/`}
                   target="_blank"
                   className="underline text-muted-foreground"

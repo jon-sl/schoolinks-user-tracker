@@ -12,8 +12,20 @@ export const environments = [
     label: "dev-purple",
   },
   {
+    value: "dev-lavender",
+    label: "dev-lavender",
+  },
+  {
     value: "dev-red",
     label: "dev-red",
+  },
+  {
+    value: "dev-crimson",
+    label: "dev-crimson",
+  },
+  {
+    value: "dataops",
+    label: "dataops",
   },
   {
     value: "qa",
