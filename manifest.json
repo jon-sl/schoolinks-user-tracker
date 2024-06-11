@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SchooLinks User Tracker",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "action": {
     "default_title": "SchooLinks User Tracker",
     "default_popup": "index.html",
