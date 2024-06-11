@@ -351,8 +351,8 @@ function App() {
               <p className="leading-7 text-center mt-0">
                 Go to{" "}
                 <a
-                  href={`https://api${
-                    env === "prod" ? "" : "." + env
+                  href={`https://${
+                    env === "prod" ? "api." : "" + env
                   }.schoolinks.com/sl-admin/`}
                   target="_blank"
                   className="underline text-muted-foreground"
