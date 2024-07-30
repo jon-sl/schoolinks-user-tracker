@@ -5,7 +5,7 @@ import { getSyncData, setSyncData } from "@/lib/utils";
 
 function App() {
   const getEnv = () => {
-    if (window.location.hostname.split(".")[0].includes("api")) {
+    if (window.location.hostname.split(".")[0].includes("app")) {
       return "prod";
     } else {
       return window.location.hostname.split(".")[0];

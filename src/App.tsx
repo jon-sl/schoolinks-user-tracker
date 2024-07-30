@@ -51,16 +51,15 @@ function App() {
     const fetchVPNStatus = async () => {
       try {
         const response = await fetch(
-          "https://api.schoolinks.com/sl-admin/login/?next=/sl-admin/"
+          "https://app.schoolinks.com/sl-admin/login/?next=/sl-admin/"
         );
         const res = await response;
-        console.log(res.status);
         if (res.status === 403) {
           setRequiresVPN(true);
           return;
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
       setRequiresVPN(false);
     };
@@ -352,7 +351,7 @@ function App() {
                 Go to{" "}
                 <a
                   href={`https://${
-                    env === "prod" ? "api." : "" + env
+                    env === "prod" ? "app" : "" + env
                   }.schoolinks.com/sl-admin/`}
                   target="_blank"
                   className="underline text-muted-foreground"
@@ -366,7 +365,6 @@ function App() {
             <div className="flex flex-col gap-y-1 overflow-auto">
               {filteredData.length > 0 ? (
                 filteredData.map((user: any) => {
-                  console.log(user);
                   return (
                     <Row
                       key={user["field-id"]}
