@@ -1,7 +1,7 @@
 {
   "name": "react-content-script",
   "private": true,
-  "version": "1.0.8",
+  "version": "1.0.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -32,7 +32,7 @@
     "web-vitals": "^3.0.3"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "@crxjs/vite-plugin@2.0.0-beta.11",
+    "@crxjs/vite-plugin": "2.0.0-beta.26",
     "@types/chrome": "^0.0.197",
     "@types/lodash": "^4.14.199",
     "@types/node": "^18.8.3",
