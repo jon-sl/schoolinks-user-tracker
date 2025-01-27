@@ -12,6 +12,10 @@ export const environments = [
     label: "dev-purple",
   },
   {
+    value: "dev-indigo",
+    label: "dev-indigo",
+  },
+  {
     value: "dev-lavender",
     label: "dev-lavender",
   },
@@ -23,6 +27,7 @@ export const environments = [
     value: "dev-crimson",
     label: "dev-crimson",
   },
+  { value: "act2", label: "act2" },
   {
     value: "dataops",
     label: "dataops",
@@ -30,6 +35,10 @@ export const environments = [
   {
     value: "qa",
     label: "qa",
+  },
+  {
+    value: "qa-blue",
+    label: "qa-blue",
   },
   {
     value: "staging",

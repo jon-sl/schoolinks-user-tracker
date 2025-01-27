@@ -156,12 +156,18 @@ function App() {
         return "text-dev-purple";
       case "dev-lavender":
         return "text-dev-lavender";
+      case "dev-indigo":
+        return "text-dev-indigo";
       case "dev-red":
         return "text-dev-red";
       case "dev-crimson":
         return "text-dev-crimson";
+      case "act2":
+        return "text-act2";
       case "qa":
         return "text-qa";
+      case "qa-blue":
+        return "text-qa-blue";
       case "staging":
         return "text-staging";
       case "stable":
