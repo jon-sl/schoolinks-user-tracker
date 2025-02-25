@@ -27,6 +27,10 @@ export const environments = [
     value: "dev-crimson",
     label: "dev-crimson",
   },
+  {
+    value: "dev-ruby",
+    label: "dev-ruby",
+  },
   { value: "act2", label: "act2" },
   {
     value: "dataops",
