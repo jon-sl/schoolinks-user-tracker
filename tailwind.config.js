@@ -15,6 +15,7 @@ module.exports = {
       "dev-lavender": "#673ab7",
       "dev-red": "#dc2626",
       "dev-crimson": "#dc2626",
+      "dev-ruby": "#dc2626",
       "dev-indigo": "#4B0082",
       act2: "#4a90e2",
       qa: "#3f51b5",
