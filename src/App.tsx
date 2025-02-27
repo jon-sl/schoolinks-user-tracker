@@ -162,6 +162,8 @@ function App() {
         return "text-dev-red";
       case "dev-crimson":
         return "text-dev-crimson";
+      case "dev-ruby":
+        return "text-dev-ruby";
       case "act2":
         return "text-act2";
       case "qa":
